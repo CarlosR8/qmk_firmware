@@ -17,6 +17,15 @@
 
 #pragma once
 
+/* 
+ * Start-up audio support
+
+#ifdef AUDIO_ENABLE
+	#define AUDIO_INIT_DELAY
+    #define STARTUP_SONG SONG(ZELDA_TREASURE)
+#endif
+ */
+
 /* USB Device descriptor parameter */
 #define PRODUCT_ID 0xA4F9
 #define DEVICE_VER 0x0006
@@ -120,3 +129,4 @@
 #define WS2812_DMA_CHANNEL 2
 
 #define RGB_DISABLE_WHEN_USB_SUSPENDED
+
