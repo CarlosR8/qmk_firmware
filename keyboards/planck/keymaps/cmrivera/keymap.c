@@ -67,38 +67,6 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
     } else return TD_UNKNOWN;
 }
 
-// Create an instance of 'td_tap_t' for the 'x' tap dance.
-//~ static td_tap_t xtap_state = {
-    //~ .is_press_action = true,
-    //~ .state = TD_NONE
-//~ };
-
-//~ void x_finished(qk_tap_dance_state_t *state, void *user_data) {
-    //~ xtap_state.state = cur_dance(state);
-    //~ switch (xtap_state.state) {
-        //~ case TD_SINGLE_TAP: register_code(KC_X); break;
-        //~ case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
-        //~ case TD_DOUBLE_TAP: register_code(KC_ESC); break;
-        //~ case TD_DOUBLE_HOLD: register_code(KC_LALT); break;
-        //~ // Last case is for fast typing. Assuming your key is `f`:
-        //~ // For example, when typing the word `buffer`, and you want to make sure that you send `ff` and not `Esc`.
-        //~ // In order to type `ff` when typing fast, the next character will have to be hit within the `TAPPING_TERM`, which by default is 200ms.
-        //~ case TD_DOUBLE_SINGLE_TAP: tap_code(KC_X); register_code(KC_X);
-        //~ default: break;
-    //~ }
-//~ }
-
-//~ void x_reset(qk_tap_dance_state_t *state, void *user_data) {
-    //~ switch (xtap_state.state) {
-        //~ case TD_SINGLE_TAP: unregister_code(KC_X); break;
-        //~ case TD_SINGLE_HOLD: unregister_code(KC_LCTL); break;
-        //~ case TD_DOUBLE_TAP: unregister_code(KC_ESC); break;
-        //~ case TD_DOUBLE_HOLD: unregister_code(KC_LALT);
-        //~ case TD_DOUBLE_SINGLE_TAP: unregister_code(KC_X);
-        //~ default: break;
-    //~ }
-    //~ xtap_state.state = TD_NONE;
-//~ }
 // TAB HOLD = BLOQ MAYUS
 static td_tap_t tabtap_state = {
     .is_press_action = true,
@@ -114,23 +82,41 @@ void dance_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
 }
 // Quad ends
 enum {
-  TD_N_enie = 0,
-  TD_C_cedille = 1,
-  TD_SLASH = 2,
+  TD_N = 0,
+  TD_C = 1,
+  M_SLSH = 2,
   TD_TAB = 3,
-   //~ X_CTL=3, //example
+  TD_EXLM = 4, 
 };
 
 void matrix_init_user(void) {
     set_unicode_input_mode(UC_WIN);
 };
 //N and Ñ
+void dance_enie_tap(qk_tap_dance_state_t *state, void *user_data) {
+  //  tabtap_state.state = cur_dance(state);
+  //   switch (tabtap_state.state) {
+  //       case TD_SINGLE_TAP: tap_key(KC_N); break;
+  //       // case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
+  //       case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
+  //       default: break;
+  //   }
+  unregister_code(KC_LCTL);
+}
 void dance_enie_finished(qk_tap_dance_state_t *state, void *user_data) {
-    if (state->count == 1) {
-        tap_key(KC_N);
-    } else {
-        tap_key(KC_SEMICOLON);
+   tabtap_state.state = cur_dance(state);
+    switch (tabtap_state.state) {
+        case TD_SINGLE_TAP: tap_key(KC_N); break;
+        case TD_SINGLE_HOLD: register_code(KC_LCTL); break; 
+        case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
+        default: break;
     }
+  // unregister_code(KC_LCTL);
+    // if (state->count == 1) {
+    //     tap_key(KC_N);
+    // } else {
+    //     tap_key(KC_SEMICOLON);
+    // }
 }
 //
 //C and Ç
@@ -160,22 +146,35 @@ void dance_slash_finished(qk_tap_dance_state_t *state, void *user_data) {
 	}
     set_mods(temp_mod);
 }
+// ! ¡
+void dance_exlm_finished(qk_tap_dance_state_t *state, void *user_data) {
+	uint8_t temp_mod = get_mods();
+	clear_mods();
+  if (state->count == 1) {
+    register_code(KC_LSFT);	
+    tap_key(ES_EXLM); // !
+  }else{
+    tap_key(ES_IEXL); // ¡
+  }
+  set_mods(temp_mod);
+}
 //
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [TD_N_enie] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_enie_finished, NULL),
-  [TD_C_cedille] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_cedille_finished, NULL), 
-  [TD_SLASH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_slash_finished, NULL),
-  //~ [X_CTL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, x_finished, x_reset),  //Example
+  [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_enie_finished, dance_enie_tap),
+  [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_cedille_finished, NULL), 
+  [M_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_slash_finished, NULL),
   [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_tab_finished, NULL),
-  //ACTION_TAP_DANCE_DOUBLE(KC_N, DE_AE)
+  [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_exlm_finished, NULL), 
 };
 
 //MACROS
 // Macro Declarations
 enum {
-    M_COMMA = 0,
+    M_COMM = 0,
     M_DOT = 1,
-    M_SEMICOLON = 2,
+    M_SCLN = 2,
+    M_QUOT = 3,
+    M_BSLS = 4,
 };
 // Macro Definitions
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
@@ -183,10 +182,10 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 	uint8_t temp_mod = get_mods();
 	clear_mods();
 	switch(id) {
-	case M_COMMA: { // , <
+	case M_COMM: { // , <
 	if (record->event.pressed) {       
 		if (temp_mod & MODS_SHIFT_MASK) {
-			tap_key(ES_LABK); //<
+			tap_key(ES_LABK); // Shift: <
 		}else{
 			tap_key(KC_COMMA); //,
 		}
@@ -197,21 +196,44 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 	  if (record->event.pressed) {     
 		if (temp_mod & MODS_SHIFT_MASK) {
 			register_code(KC_LSFT);	
-			tap_key(ES_LABK); //>
+			tap_key(ES_LABK); // Shift: >
 		}else{
 			tap_key(KC_DOT); //.
 		}
 	  }
 	}
 	break;
-	case M_SEMICOLON: { // ; :
+	case M_SCLN: { // ; :
 	  if (record->event.pressed) {     
 		if (temp_mod & MODS_SHIFT_MASK) {
 			register_code(KC_LSFT);	
-			tap_key(KC_DOT); // :
+			tap_key(KC_DOT); // Shift: :
 		}else{
 			register_code(KC_LSFT);	
 			tap_key(KC_COMM); //;
+		}
+	  }
+	}
+	break;
+  case M_QUOT: { // ' "  
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+			register_code(KC_LSFT);	
+			tap_key(ES_DQUO); // Shift: "
+		}else{
+			tap_key(ES_QUOT); //'
+		}
+	  }
+	}
+	break;
+  case M_BSLS: { // \ |
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+			register_code(KC_ALGR);	
+			tap_key(ES_1); // Shift: |
+		}else{
+      register_code(KC_ALGR);	
+			tap_key(ES_MORD); /* \ */
 		}
 	  }
 	}
@@ -259,8 +281,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 [_QWERTY] = LAYOUT_planck_grid(
     KC_ESC,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_BSPC,
-    KC_TAB,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
-    KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT ,
+    KC_TAB,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    M(M_SCLN), M(M_QUOT),
+    KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    M(M_COMM), M(M_DOT),  TD(M_SLSH), KC_ENT ,
     BACKLIT, KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_SPC,  KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT
 ),
 
@@ -276,10 +298,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_COLEMAK] = LAYOUT_planck_grid(
-    KC_ESC,   KC_Q,    KC_W,    KC_F,    KC_P,    KC_G,    KC_J,    KC_L,    KC_U,    KC_Y,    M(M_SEMICOLON), KC_BSPC,
-    TD(TD_TAB),  KC_A,    KC_R,    KC_S,    KC_T,    KC_D,    KC_H,    TD(TD_N_enie),    KC_E,    KC_I,    KC_O,    KC_QUOT,
-    KC_LSFT, KC_Z,    KC_X,    TD(TD_C_cedille),    KC_V,    KC_B,    KC_K,    KC_M,    M(M_COMMA), M(M_DOT),  TD(TD_SLASH), KC_ENT ,
-    KC_LCTL, RGB_TOG, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT
+  KC_ESC,     KC_Q,     KC_W,     KC_F,     KC_P,     KC_G,     KC_J,     KC_L,     KC_U,     KC_Y,     M(M_SCLN),  KC_BSPC,
+  TD(TD_TAB), GUI_T(KC_A),     ALT_T(KC_R),     SFT_T(KC_S),     CTL_T(KC_T),     KC_D,     KC_H,     TD(TD_N), SFT_T(KC_E),     ALT_T(KC_I),     GUI_T(KC_O),       M(M_QUOT),
+  // TD(TD_TAB), KC_A,     KC_R,     KC_S,     KC_T,     KC_D,     KC_H,     TD(TD_N), KC_E,     KC_I,     KC_O,       M(M_QUOT),
+  KC_LSFT,    KC_Z,     KC_X,     TD(TD_C), KC_V,     KC_B,     KC_K,     KC_M,     M(M_COMM),M(M_DOT), TD(M_SLSH), KC_ENT ,
+  KC_LCTL,    RGB_TOG,  KC_LGUI,  KC_LALT,  LOWER,    KC_SPC,   KC_SPC,   RAISE,    KC_LEFT,  KC_DOWN,  KC_UP,      KC_RGHT
 ),
 
 /* Dvorak
@@ -302,38 +325,38 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Lower
  * ,-----------------------------------------------------------------------------------.
- * |   ~  |   !  |   @  |   #  |   $  |   %  |   ^  |   &  |   *  |   (  |   )  | Del  |
+ * |   ~  |   !  |   @  |   (  |   )  |   %  |   ^  |   7  |   8  |   9  |   -  | Bksp |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Del  |  F1  |  F2  |  F3  |  F4  |  F5  |  F6  |   _  |   +  |   {  |   }  |  |   |
+ * |   &  |   #  |   €  |   [  |   ]  |   *  |   ´  |   4  |   5  |   6  |   +  |  =   |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |  F7  |  F8  |  F9  |  F10 |  F11 |  F12 |ISO ~ |ISO | | Home | End  |      |
+ * |      |      |   $  |   {  |   }  |   ¨  |   `  |   1  |   2  |   3  | \ |  |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |      |      |Lower |             |Adjust| Next | Vol- | Vol+ | Play |
+ * | Ctrl | RGB  | GUI  | Alt  |Lower |             |Adjust|   0  |   .  | Vol+ | Play |
  * `-----------------------------------------------------------------------------------'
  */
 [_LOWER] = LAYOUT_planck_grid(
-    KC_TILD, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR,    KC_ASTR,    KC_LPRN, KC_RPRN, KC_DEL,
-    KC_DEL,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_UNDS,    KC_PLUS,    KC_LCBR, KC_RCBR, KC_BSLS,
-    _______, KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  S(KC_NUHS), S(KC_NUBS), KC_HOME, KC_END,  _______,
-    _______, _______, _______, _______, _______, _______, _______, _______,    KC_MNXT,    KC_VOLD, KC_VOLU, KC_MPLY
+    ES_TILD, TD(TD_EXLM), ES_AT,    ES_LPRN, ES_RPRN,  KC_PERC, ES_CIRC,  KC_7,    KC_8,   KC_9, ES_MINS, KC_BSPC,
+    ES_AMPR, ES_HASH,     ES_EURO,  ES_LBRC, ES_RBRC,  ES_ASTR, ES_ACUT,  KC_4,    KC_5,   KC_6, ES_PLUS, ES_EQL,
+    _______, _______,     ES_DLR,   ES_LCBR, ES_RCBR,  ES_DIAE, ES_GRV,  KC_1,    KC_2,   KC_3, M(M_BSLS),  _______,
+    _______, _______,     _______,  _______, _______,  _______, _______,  _______, KC_0,   KC_DOT, KC_VOLU, KC_MPLY
 ),
 
-/* Raise
+/* Raise 
  * ,-----------------------------------------------------------------------------------.
- * |   `  |   1  |   2  |   3  |   4  |   5  |   6  |   7  |   8  |   9  |   0  | Bksp |
+ * |      |  F1  |  F2  |  F3  |  F4  |      |      | Home |  Up  |  End |Pg Up | Bksp |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Del  |  F1  |  F2  |  F3  |  F4  |  F5  |  F6  |   -  |   =  |   [  |   ]  |  \   |
+ * |      |  F5  |  F6  |  F7  |  F8  |      |      | Left | Down |Right |Pg Dn |  \ | |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |  F7  |  F8  |  F9  |  F10 |  F11 |  F12 |ISO # |ISO / |Pg Up |Pg Dn |      |
+ * |      |  F9  |  F10 |  F11 |  F12 |      |      |ISO # |ISO / |Pg Up |Pg Dn |Insert|
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |      |      |Adjust|             |Raise | Next | Vol- | Vol+ | Play |
+ * | Ctrl | RGB  | GUI  | Alt  |Adjust|             |Raise | Next | Vol- | Vol+ | Play |
  * `-----------------------------------------------------------------------------------'
  */
 [_RAISE] = LAYOUT_planck_grid(
-    KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
-    KC_DEL,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_MINS, KC_EQL,  KC_LBRC, KC_RBRC, KC_BSLS,
-    _______, KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_NUHS, KC_NUBS, KC_PGUP, KC_PGDN, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, KC_MNXT, KC_VOLD, KC_VOLU, KC_MPLY
+    _______,  KC_F1,   KC_F2,    KC_F3,    KC_F4,   _______,  _______,  KC_HOME, KC_UP,   KC_END,    KC_PGUP,  KC_BSPC,
+    _______,  KC_F5,   KC_F6,    KC_F7,    KC_F8,   _______,  _______,  KC_LEFT, KC_DOWN, KC_RIGHT,  KC_PGDN,  M(M_BSLS),
+    _______, KC_F9,   KC_F10,   KC_F11,   KC_F12,  _______,  _______,  KC_NUHS, KC_NUBS, KC_PGUP,   KC_PGDN,  KC_INS,
+    _______,    _______,  _______,  _______, _______, _______, _______, _______, KC_MNXT, KC_VOLD, KC_VOLU, KC_MPLY
 ),
 
 /* Plover layer (http://opensteno.org)

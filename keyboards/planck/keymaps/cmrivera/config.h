@@ -16,8 +16,9 @@
 
 #pragma once
 #include "config_common.h"
-
-#define TAPPING_TERM 200
+#define TAPPING_TERM 220
+#define IGNORE_MOD_TAP_INTERRUPT
+#define TAPPING_FORCE_HOLD
 
 #ifdef AUDIO_ENABLE
 #define AUDIO_INIT_DELAY
