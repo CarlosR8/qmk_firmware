@@ -18,6 +18,32 @@
 #include "muse.h"
 #include "keymap_spanish.h"
 
+// Layers
+enum planck_layers {
+  _QWERTY,
+  _COLEMAK,
+  _DVORAK,
+  _LOWER,
+  _RAISE,
+  _PLOVER,
+  _ADJUST,
+  _MOUSE,
+};
+
+enum planck_keycodes {
+  QWERTY = SAFE_RANGE,
+  COLEMAK,
+  DVORAK,
+  PLOVER,
+  BACKLIT,
+  EXT_PLV
+};
+
+#define LOWER MO(_LOWER)
+#define RAISE MO(_RAISE)
+#define MOUSE MO(_MOUSE)
+//
+
 //TAP DANCING
 #define MODS_SHIFT_MASK (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
 void tap_key(uint16_t keycode) {
@@ -87,6 +113,7 @@ enum {
   M_SLSH = 2,
   TD_TAB = 3,
   TD_EXLM = 4, 
+  TD_MOUSE = 5,
 };
 
 void matrix_init_user(void) {
@@ -159,12 +186,26 @@ void dance_exlm_finished(qk_tap_dance_state_t *state, void *user_data) {
   set_mods(temp_mod);
 }
 //
+// Left arrow or activate Mouse layer
+void dance_mouse_finish(qk_tap_dance_state_t *state, void *user_data) {
+tabtap_state.state = cur_dance(state);
+    switch (tabtap_state.state) {
+        case TD_SINGLE_TAP: tap_key(KC_LEFT); break;
+        case TD_SINGLE_HOLD: layer_on(_MOUSE); break; 
+        default: break;
+    }
+}
+void dance_mouse_reset(qk_tap_dance_state_t *state, void *user_data) {
+  layer_off(_MOUSE);
+}
+//
 qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_enie_finished, dance_enie_tap),
   [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_cedille_finished, NULL), 
   [M_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_slash_finished, NULL),
   [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_tab_finished, NULL),
   [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_exlm_finished, NULL), 
+  [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_mouse_finish, dance_mouse_reset), 
 };
 
 //MACROS
@@ -244,30 +285,8 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 };
 //
 
-enum planck_layers {
-  _QWERTY,
-  _COLEMAK,
-  _DVORAK,
-  _LOWER,
-  _RAISE,
-  _PLOVER,
-  _ADJUST
-};
-
-enum planck_keycodes {
-  QWERTY = SAFE_RANGE,
-  COLEMAK,
-  DVORAK,
-  PLOVER,
-  BACKLIT,
-  EXT_PLV
-};
-
-#define LOWER MO(_LOWER)
-#define RAISE MO(_RAISE)
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-
+// Tool used to align the columns: https://onlinetexttools.com/convert-text-to-nice-columns
 /* Qwerty
  * ,-----------------------------------------------------------------------------------.
  * | Esc  |   Q  |   W  |   E  |   R  |   T  |   Y  |   U  |   I  |   O  |   P  | Bksp |
@@ -280,10 +299,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_QWERTY] = LAYOUT_planck_grid(
-    KC_ESC,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_BSPC,
-    KC_TAB,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    M(M_SCLN), M(M_QUOT),
-    KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    M(M_COMM), M(M_DOT),  TD(M_SLSH), KC_ENT ,
-    BACKLIT, KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_SPC,  KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT
+KC_ESC  ,KC_Q    ,KC_W    ,KC_E    ,KC_R  ,KC_T   ,KC_Y   ,KC_U  ,KC_I      ,KC_O     ,KC_P       ,KC_BSPC   ,
+KC_TAB  ,KC_A    ,KC_S    ,KC_D    ,KC_F  ,KC_G   ,KC_H   ,KC_J  ,KC_K      ,KC_L     ,M(M_SCLN)  ,M(M_QUOT) ,
+KC_LSFT ,KC_Z    ,KC_X    ,KC_C    ,KC_V  ,KC_B   ,KC_N   ,KC_M  ,M(M_COMM) ,M(M_DOT) ,TD(M_SLSH) ,KC_ENT    ,
+BACKLIT ,KC_LCTL ,KC_LALT ,KC_LGUI ,LOWER ,KC_SPC ,KC_SPC ,RAISE ,KC_LEFT   ,KC_DOWN  ,KC_UP      ,KC_RGHT   
 ),
 
 /* Colemak
@@ -298,11 +317,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_COLEMAK] = LAYOUT_planck_grid(
-  KC_ESC,     KC_Q,     KC_W,     KC_F,     KC_P,     KC_G,     KC_J,     KC_L,     KC_U,     KC_Y,     M(M_SCLN),  KC_BSPC,
-  TD(TD_TAB), GUI_T(KC_A),     ALT_T(KC_R),     SFT_T(KC_S),     CTL_T(KC_T),     KC_D,     KC_H,     TD(TD_N), SFT_T(KC_E),     ALT_T(KC_I),     GUI_T(KC_O),       M(M_QUOT),
-  // TD(TD_TAB), KC_A,     KC_R,     KC_S,     KC_T,     KC_D,     KC_H,     TD(TD_N), KC_E,     KC_I,     KC_O,       M(M_QUOT),
-  KC_LSFT,    KC_Z,     KC_X,     TD(TD_C), KC_V,     KC_B,     KC_K,     KC_M,     M(M_COMM),M(M_DOT), TD(M_SLSH), KC_ENT ,
-  KC_LCTL,    RGB_TOG,  KC_LGUI,  KC_LALT,  LOWER,    KC_SPC,   KC_SPC,   RAISE,    KC_LEFT,  KC_DOWN,  KC_UP,      KC_RGHT
+KC_ESC     ,KC_Q        ,KC_W        ,KC_F        ,KC_P        ,KC_G   ,KC_J   ,KC_L     ,KC_U         ,KC_Y        ,M(M_SCLN)   ,KC_BSPC   , 
+TD(TD_TAB) ,GUI_T(KC_A) ,ALT_T(KC_R) ,SFT_T(KC_S) ,CTL_T(KC_T) ,KC_D   ,KC_H   ,TD(TD_N) ,SFT_T(KC_E)  ,ALT_T(KC_I) ,GUI_T(KC_O) ,M(M_QUOT) , 
+KC_LSFT    ,KC_Z        ,KC_X        ,TD(TD_C)    ,KC_V        ,KC_B   ,KC_K   ,KC_M     ,M(M_COMM)    ,M(M_DOT)    ,TD(M_SLSH)  ,KC_ENT    , 
+KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,RAISE    ,TD(TD_MOUSE) ,KC_DOWN     ,KC_UP       ,KC_RGHT   
 ),
 
 /* Dvorak
@@ -335,10 +353,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_LOWER] = LAYOUT_planck_grid(
-    ES_TILD, TD(TD_EXLM), ES_AT,    ES_LPRN, ES_RPRN,  KC_PERC, ES_CIRC,  KC_7,    KC_8,   KC_9, ES_MINS, KC_BSPC,
-    ES_AMPR, ES_HASH,     ES_EURO,  ES_LBRC, ES_RBRC,  ES_ASTR, ES_ACUT,  KC_4,    KC_5,   KC_6, ES_PLUS, ES_EQL,
-    _______, _______,     ES_DLR,   ES_LCBR, ES_RCBR,  ES_DIAE, ES_GRV,  KC_1,    KC_2,   KC_3, M(M_BSLS),  _______,
-    _______, _______,     _______,  _______, _______,  _______, _______,  _______, KC_0,   KC_DOT, KC_VOLU, KC_MPLY
+ES_TILD ,TD(TD_EXLM)    ,ES_AT          ,ES_LPRN        ,ES_RPRN        ,KC_PERC ,ES_CIRC ,KC_7        ,KC_8        ,KC_9        ,ES_MINS        ,KC_BSPC ,
+ES_AMPR ,GUI_T(ES_HASH) ,ALT_T(ES_EURO) ,SFT_T(ES_LBRC) ,CTL_T(ES_RBRC) ,ES_ASTR ,ES_ACUT ,CTL_T(KC_4) ,SFT_T(KC_5) ,ALT_T(KC_6) ,GUI_T(ES_PLUS) ,ES_EQL  ,
+_______ ,_______        ,ES_DLR         ,ES_LCBR        ,ES_RCBR        ,ES_DIAE ,ES_GRV  ,KC_1        ,KC_2        ,KC_3        ,M(M_BSLS)      ,_______ ,
+_______ ,_______        ,_______        ,_______        ,_______        ,_______ ,_______ ,_______     ,KC_0        ,KC_DOT      ,KC_VOLU        ,KC_MPLY 
 ),
 
 /* Raise 
@@ -353,10 +371,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_RAISE] = LAYOUT_planck_grid(
-    _______,  KC_F1,   KC_F2,    KC_F3,    KC_F4,   _______,  _______,  KC_HOME, KC_UP,   KC_END,    KC_PGUP,  KC_BSPC,
-    _______,  KC_F5,   KC_F6,    KC_F7,    KC_F8,   _______,  _______,  KC_LEFT, KC_DOWN, KC_RIGHT,  KC_PGDN,  M(M_BSLS),
-    _______, KC_F9,   KC_F10,   KC_F11,   KC_F12,  _______,  _______,  KC_NUHS, KC_NUBS, KC_PGUP,   KC_PGDN,  KC_INS,
-    _______,    _______,  _______,  _______, _______, _______, _______, _______, KC_MNXT, KC_VOLD, KC_VOLU, KC_MPLY
+_______ ,KC_F1        ,KC_F2        ,KC_F3        ,KC_F4        ,_______ ,_______ ,KC_HOME ,KC_UP   ,KC_END   ,KC_PGUP ,KC_BSPC   , 
+_______ ,GUI_T(KC_F5) ,ALT_T(KC_F6) ,SFT_T(KC_F7) ,CTL_T(KC_F8) ,_______ ,_______ ,KC_LEFT ,KC_DOWN ,KC_RIGHT ,KC_PGDN ,M(M_BSLS) , 
+_______ ,KC_F9        ,KC_F10       ,KC_F11       ,KC_F12       ,_______ ,_______ ,KC_NUHS ,KC_NUBS ,KC_PGUP  ,KC_PGDN ,KC_INS    , 
+_______ ,_______      ,_______      ,_______      ,_______      ,_______ ,_______ ,_______ ,KC_MNXT ,KC_VOLD  ,KC_VOLU ,KC_MPLY   
 ),
 
 /* Plover layer (http://opensteno.org)
@@ -393,6 +411,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, RESET,   DEBUG,   RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD,  RGB_VAI, RGB_VAD, KC_DEL ,
     _______, _______, MU_MOD,  AU_ON,   AU_OFF,  AG_NORM, AG_SWAP, QWERTY,  COLEMAK,  DVORAK,  PLOVER,  _______,
     _______, MUV_DE,  MUV_IN,  MU_ON,   MU_OFF,  MI_ON,   MI_OFF,  TERM_ON, TERM_OFF, _______, _______, _______,
+    _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, _______
+),
+
+/* Mouse
+ * ,-----------------------------------------------------------------------------------.
+ * |      |      |      |      |      |      |      |LeftC | Up   |RightC|ScroUp|      |
+ * |------+------+------+------+------+------+------+------+------+------+------+------|
+ * |      |      |      |      |      |      |      | Left | Down | Right|ScroDo|      |
+ * |------+------+------+------+------+------+------+------+------+------+------+------|
+ * |      |      |      |      |      |      |      |Speed1|Speed2|Speed3|      |      |
+ * |------+------+------+------+------+------+------+------+------+------+------+------|
+ * |      |      |      |      |      |             |      |MOUSEL|      |      |      |
+ * `-----------------------------------------------------------------------------------'
+ */
+[_MOUSE] = LAYOUT_planck_grid(
+    _______, _______, _______, _______, _______, _______, _______, KC_BTN1, KC_MS_U,  KC_BTN2, KC_WH_U, _______,
+    _______, _______, _______, _______, _______, _______, _______, KC_MS_L, KC_MS_D,  KC_MS_R, KC_WH_D, _______,
+    _______, _______, _______, _______, _______, _______, _______, KC_ACL0, KC_ACL1,  KC_ACL2, _______, _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, _______
 )
 
