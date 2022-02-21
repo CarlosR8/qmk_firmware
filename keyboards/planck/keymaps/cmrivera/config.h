@@ -16,9 +16,13 @@
 
 #pragma once
 #include "config_common.h"
-#define TAPPING_TERM 220
+#define TAPPING_TERM 250
 #define IGNORE_MOD_TAP_INTERRUPT
 #define TAPPING_FORCE_HOLD
+
+#define MOUSEKEY_DELAY 50
+#define MOUSEKEY_MOVE_DELTA 3
+#define MOUSEKEY_MAX_SPEED 8
 
 #ifdef AUDIO_ENABLE
 #define AUDIO_INIT_DELAY

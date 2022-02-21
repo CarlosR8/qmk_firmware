@@ -102,7 +102,7 @@ void dance_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
     tabtap_state.state = cur_dance(state);
     switch (tabtap_state.state) {
         case TD_SINGLE_TAP: tap_key(KC_TAB); break;
-        case TD_SINGLE_HOLD: tap_key(KC_CAPS); break;
+        case TD_DOUBLE_HOLD: tap_key(KC_CAPS); break;
         default: break;
     }
 }
@@ -186,26 +186,32 @@ void dance_exlm_finished(qk_tap_dance_state_t *state, void *user_data) {
   set_mods(temp_mod);
 }
 //
+
 // Left arrow or activate Mouse layer
+void dance_mouse_tap(qk_tap_dance_state_t *state, void *user_data) {
+  layer_on(_RAISE);
+}
+
 void dance_mouse_finish(qk_tap_dance_state_t *state, void *user_data) {
 tabtap_state.state = cur_dance(state);
     switch (tabtap_state.state) {
-        case TD_SINGLE_TAP: tap_key(KC_LEFT); break;
-        case TD_SINGLE_HOLD: layer_on(_MOUSE); break; 
+        case TD_DOUBLE_HOLD: layer_on(_MOUSE); break; 
         default: break;
     }
 }
+
 void dance_mouse_reset(qk_tap_dance_state_t *state, void *user_data) {
+  layer_off(_RAISE);
   layer_off(_MOUSE);
 }
 //
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_enie_finished, dance_enie_tap),
-  [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_cedille_finished, NULL), 
-  [M_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_slash_finished, NULL),
-  [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_tab_finished, NULL),
-  [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_exlm_finished, NULL), 
-  [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_mouse_finish, dance_mouse_reset), 
+  [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_enie_finished, dance_enie_tap, 170),
+  [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_cedille_finished, NULL, 200), 
+  [M_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_slash_finished, NULL, 200),
+  [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_tab_finished, NULL, 200),
+  [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_exlm_finished, NULL, 200), 
+  [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(dance_mouse_tap, dance_mouse_finish, dance_mouse_reset, 200), 
 };
 
 //MACROS
@@ -320,7 +326,7 @@ BACKLIT ,KC_LCTL ,KC_LALT ,KC_LGUI ,LOWER ,KC_SPC ,KC_SPC ,RAISE ,KC_LEFT   ,KC_
 KC_ESC     ,KC_Q        ,KC_W        ,KC_F        ,KC_P        ,KC_G   ,KC_J   ,KC_L     ,KC_U         ,KC_Y        ,M(M_SCLN)   ,KC_BSPC   , 
 TD(TD_TAB) ,GUI_T(KC_A) ,ALT_T(KC_R) ,SFT_T(KC_S) ,CTL_T(KC_T) ,KC_D   ,KC_H   ,TD(TD_N) ,SFT_T(KC_E)  ,ALT_T(KC_I) ,GUI_T(KC_O) ,M(M_QUOT) , 
 KC_LSFT    ,KC_Z        ,KC_X        ,TD(TD_C)    ,KC_V        ,KC_B   ,KC_K   ,KC_M     ,M(M_COMM)    ,M(M_DOT)    ,TD(M_SLSH)  ,KC_ENT    , 
-KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,RAISE    ,TD(TD_MOUSE) ,KC_DOWN     ,KC_UP       ,KC_RGHT   
+KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,TD(TD_MOUSE)    ,KC_LEFT ,KC_DOWN     ,KC_UP       ,KC_RGHT   
 ),
 
 /* Dvorak
@@ -354,12 +360,13 @@ KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,
  */
 [_LOWER] = LAYOUT_planck_grid(
 ES_TILD ,TD(TD_EXLM)    ,ES_AT          ,ES_LPRN        ,ES_RPRN        ,KC_PERC ,ES_CIRC ,KC_7        ,KC_8        ,KC_9        ,ES_MINS        ,KC_BSPC ,
-ES_AMPR ,GUI_T(ES_HASH) ,ALT_T(ES_EURO) ,SFT_T(ES_LBRC) ,CTL_T(ES_RBRC) ,ES_ASTR ,ES_ACUT ,CTL_T(KC_4) ,SFT_T(KC_5) ,ALT_T(KC_6) ,GUI_T(ES_PLUS) ,ES_EQL  ,
+//ES_AMPR , MT(KC_LGUI, ES_HASH) ,ALT_T(ES_EURO) ,SFT_T(ES_LBRC) ,CTL_T(ES_RBRC) ,ES_ASTR ,ES_ACUT ,CTL_T(KC_4) ,SFT_T(KC_5) ,ALT_T(KC_6) ,GUI_T(ES_PLUS) ,ES_EQL  ,
+ES_AMPR , ES_HASH ,ES_EURO,ES_LBRC ,ES_RBRC ,ES_ASTR ,ES_ACUT ,KC_4 ,KC_5 ,KC_6 ,ES_PLUS ,ES_EQL  ,
 _______ ,_______        ,ES_DLR         ,ES_LCBR        ,ES_RCBR        ,ES_DIAE ,ES_GRV  ,KC_1        ,KC_2        ,KC_3        ,M(M_BSLS)      ,_______ ,
 _______ ,_______        ,_______        ,_______        ,_______        ,_______ ,_______ ,_______     ,KC_0        ,KC_DOT      ,KC_VOLU        ,KC_MPLY 
 ),
 
-/* Raise 
+/* Raise
  * ,-----------------------------------------------------------------------------------.
  * |      |  F1  |  F2  |  F3  |  F4  |      |      | Home |  Up  |  End |Pg Up | Bksp |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
