@@ -72,7 +72,8 @@ td_state_t cur_dance(qk_tap_dance_state_t *state);
 
 td_state_t cur_dance(qk_tap_dance_state_t *state) {
     if (state->count == 1) {
-        if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
+        if (state->interrupted || !state->pressed) return TD_SINGLE_TAP; // interrution removed to combine tap dancing and home row mod
+        // if (!state->pressed) return TD_SINGLE_TAP;
         // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
         else return TD_SINGLE_HOLD;
     } else if (state->count == 2) {
@@ -93,24 +94,27 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
     } else return TD_UNKNOWN;
 }
 
-// TAB HOLD = BLOQ MAYUS
-static td_tap_t tabtap_state = {
+// Register key state
+static td_tap_t keytap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
 void dance_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
-    tabtap_state.state = cur_dance(state);
-    switch (tabtap_state.state) {
-        case TD_SINGLE_TAP: tap_key(KC_TAB); break;
+    keytap_state.state = cur_dance(state);
+    switch (keytap_state.state) {
+        case TD_SINGLE_HOLD: register_code(KC_LSHIFT); break;
         case TD_DOUBLE_HOLD: tap_key(KC_CAPS); break;
         default: break;
     }
+}
+void dance_tab_reset(qk_tap_dance_state_t *state, void *user_data) {
+  unregister_code(KC_LSHIFT);
 }
 // Quad ends
 enum {
   TD_N = 0,
   TD_C = 1,
-  M_SLSH = 2,
+  TD_SLSH = 2,
   TD_TAB = 3,
   TD_EXLM = 4, 
   TD_MOUSE = 5,
@@ -120,31 +124,31 @@ void matrix_init_user(void) {
     set_unicode_input_mode(UC_WIN);
 };
 //N and Ñ
-void dance_enie_tap(qk_tap_dance_state_t *state, void *user_data) {
-  //  tabtap_state.state = cur_dance(state);
-  //   switch (tabtap_state.state) {
-  //       case TD_SINGLE_TAP: tap_key(KC_N); break;
-  //       // case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
-  //       case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
-  //       default: break;
-  //   }
-  unregister_code(KC_LCTL);
-}
-void dance_enie_finished(qk_tap_dance_state_t *state, void *user_data) {
-   tabtap_state.state = cur_dance(state);
-    switch (tabtap_state.state) {
-        case TD_SINGLE_TAP: tap_key(KC_N); break;
-        case TD_SINGLE_HOLD: register_code(KC_LCTL); break; 
-        case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
-        default: break;
-    }
-  // unregister_code(KC_LCTL);
-    // if (state->count == 1) {
-    //     tap_key(KC_N);
-    // } else {
-    //     tap_key(KC_SEMICOLON);
-    // }
-}
+// void dance_enie_reset(qk_tap_dance_state_t *state, void *user_data) {
+//   //  keytap_state.state = cur_dance(state);
+//   //   switch (keytap_state.state) {
+//   //       case TD_SINGLE_TAP: tap_key(KC_N); break;
+//   //       // case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
+//   //       case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
+//   //       default: break;
+//   //   }
+//   unregister_code(KC_LCTL);
+// }
+// void dance_enie_finished(qk_tap_dance_state_t *state, void *user_data) {
+//    keytap_state.state = cur_dance(state);
+//     switch (keytap_state.state) {
+//         case TD_SINGLE_TAP: tap_key(KC_N); break;
+//         case TD_SINGLE_HOLD: register_code(KC_LCTL); break; 
+//         case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
+//         default: break;
+//     }
+//   // unregister_code(KC_LCTL);
+//     // if (state->count == 1) {
+//     //     tap_key(KC_N);
+//     // } else {
+//     //     tap_key(KC_SEMICOLON);
+//     // }
+// }
 //
 //C and Ç
 void dance_cedille_finished(qk_tap_dance_state_t *state, void *user_data) {
@@ -161,17 +165,43 @@ void dance_slash_finished(qk_tap_dance_state_t *state, void *user_data) {
 	clear_mods();
 	if (temp_mod & MODS_SHIFT_MASK) { // Questions marks
 		if (state->count == 1) {
-			register_code(KC_LSFT);	
-			tap_key(ES_QUOT); // ?
+			// register_code(KC_LSFT);	
+			// tap_key(ES_QUOT); // ?
+      register_code16(S(ES_QUOT));
+      unregister_code16(S(ES_QUOT));
 		}else{
 			register_code(KC_LSFT);	
 			tap_key(ES_IEXL); // ¿
 		}
 	}else{ // Slash
 		register_code(KC_LSFT);	
-        tap_key(ES_7); // /
+    tap_key(ES_7); // /
 	}
-    set_mods(temp_mod);
+  set_mods(temp_mod);
+
+  // uint8_t temp_mod = get_mods(); // doesn't work better
+  // keytap_state.state = cur_dance(state);
+  // switch (keytap_state.state) {
+  //     case TD_SINGLE_TAP: 
+  //       if (temp_mod & MODS_SHIFT_MASK) {
+  //         // register_code(KC_LSFT);	
+  //         // tap_key(ES_QUOT); // ?
+  //         register_code16(S(ES_QUOT));
+  //         unregister_code16(S(ES_QUOT));
+  //       }else{
+  //         register_code(KC_LSFT);	
+  //         tap_key(ES_7); // /
+  //       }
+  //       break;
+  //     case TD_DOUBLE_TAP: 
+  //       if (temp_mod & MODS_SHIFT_MASK) {
+  //         register_code(KC_LSFT);	
+  //         tap_key(ES_IEXL); // ¿
+  //       }
+  //       break;
+  //     default: break;
+  // }
+  // set_mods(temp_mod);
 }
 // ! ¡
 void dance_exlm_finished(qk_tap_dance_state_t *state, void *user_data) {
@@ -193,8 +223,8 @@ void dance_mouse_tap(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void dance_mouse_finish(qk_tap_dance_state_t *state, void *user_data) {
-tabtap_state.state = cur_dance(state);
-    switch (tabtap_state.state) {
+keytap_state.state = cur_dance(state);
+    switch (keytap_state.state) {
         case TD_DOUBLE_HOLD: layer_on(_MOUSE); break; 
         default: break;
     }
@@ -206,10 +236,10 @@ void dance_mouse_reset(qk_tap_dance_state_t *state, void *user_data) {
 }
 //
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_enie_finished, dance_enie_tap, 170),
+  // [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_enie_finished, dance_enie_reset, 160),
   [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_cedille_finished, NULL, 200), 
-  [M_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_slash_finished, NULL, 200),
-  [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_tab_finished, NULL, 200),
+  [TD_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_slash_finished, NULL, 170),
+  [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_tab_finished, dance_tab_reset, 150),
   [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_exlm_finished, NULL, 200), 
   [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(dance_mouse_tap, dance_mouse_finish, dance_mouse_reset, 200), 
 };
@@ -222,6 +252,9 @@ enum {
     M_SCLN = 2,
     M_QUOT = 3,
     M_BSLS = 4,
+    M_TEXT = 5,
+    M_TEXT1 = 6,
+    M_LSPOT = 7,
 };
 // Macro Definitions
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
@@ -285,6 +318,25 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
 	  }
 	}
 	break;
+  case M_TEXT: { // Sending text 1 
+	  if (record->event.pressed) {     
+      SEND_STRING("setxkbmap es");
+	  }
+	}
+	break;
+  case M_TEXT1: { // Sending text 2
+	  if (record->event.pressed) {     
+      SEND_STRING("Carlos RIVERA");
+	  }
+	}
+	break;
+  case M_LSPOT: { // Send AltGr + L to trigger Spotify like
+	  if (record->event.pressed) {     
+      register_code(KC_ALGR);
+      tap_key(KC_L);
+	  }
+	}
+	break;
   }
   set_mods(temp_mod);
   return MACRO_NONE;
@@ -305,10 +357,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * `-----------------------------------------------------------------------------------'
  */
 [_QWERTY] = LAYOUT_planck_grid(
-KC_ESC  ,KC_Q    ,KC_W    ,KC_E    ,KC_R  ,KC_T   ,KC_Y   ,KC_U  ,KC_I      ,KC_O     ,KC_P       ,KC_BSPC   ,
-KC_TAB  ,KC_A    ,KC_S    ,KC_D    ,KC_F  ,KC_G   ,KC_H   ,KC_J  ,KC_K      ,KC_L     ,M(M_SCLN)  ,M(M_QUOT) ,
-KC_LSFT ,KC_Z    ,KC_X    ,KC_C    ,KC_V  ,KC_B   ,KC_N   ,KC_M  ,M(M_COMM) ,M(M_DOT) ,TD(M_SLSH) ,KC_ENT    ,
-BACKLIT ,KC_LCTL ,KC_LALT ,KC_LGUI ,LOWER ,KC_SPC ,KC_SPC ,RAISE ,KC_LEFT   ,KC_DOWN  ,KC_UP      ,KC_RGHT   
+KC_ESC  ,KC_Q    ,KC_W    ,KC_E    ,KC_R  ,KC_T   ,KC_Y   ,KC_U  ,KC_I      ,KC_O     ,KC_P        ,KC_BSPC   , 
+KC_TAB  ,KC_A    ,KC_S    ,KC_D    ,KC_F  ,KC_G   ,KC_H   ,KC_J  ,KC_K      ,KC_L     ,M(M_SCLN)   ,M(M_QUOT) , 
+KC_LSFT ,KC_Z    ,KC_X    ,KC_C    ,KC_V  ,KC_B   ,KC_N   ,KC_M  ,M(M_COMM) ,M(M_DOT) ,TD(TD_SLSH) ,KC_ENT    , 
+BACKLIT ,KC_LCTL ,KC_LALT ,KC_LGUI ,LOWER ,KC_SPC ,KC_SPC ,RAISE ,KC_LEFT   ,KC_DOWN  ,KC_UP       ,KC_RGHT   
 ),
 
 /* Colemak
@@ -319,14 +371,14 @@ BACKLIT ,KC_LCTL ,KC_LALT ,KC_LGUI ,LOWER ,KC_SPC ,KC_SPC ,RAISE ,KC_LEFT   ,KC_
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * | Shift|   Z  |   X  |   C  |   V  |   B  |   K  |   M  |   ,  |   .  |   /  |Enter |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Ctrl | RGB  | GUI  | Alt  |Lower |    Space    |Raise | Left | Down |  Up  |Right |
+ * | Ctrl | RGB  | GUI  | Alt  |Lower |    Space    |Raise | MENU | Down |  Up  |Right |
  * `-----------------------------------------------------------------------------------'
  */
 [_COLEMAK] = LAYOUT_planck_grid(
-KC_ESC     ,KC_Q        ,KC_W        ,KC_F        ,KC_P        ,KC_G   ,KC_J   ,KC_L     ,KC_U         ,KC_Y        ,M(M_SCLN)   ,KC_BSPC   , 
-TD(TD_TAB) ,GUI_T(KC_A) ,ALT_T(KC_R) ,SFT_T(KC_S) ,CTL_T(KC_T) ,KC_D   ,KC_H   ,TD(TD_N) ,SFT_T(KC_E)  ,ALT_T(KC_I) ,GUI_T(KC_O) ,M(M_QUOT) , 
-KC_LSFT    ,KC_Z        ,KC_X        ,TD(TD_C)    ,KC_V        ,KC_B   ,KC_K   ,KC_M     ,M(M_COMM)    ,M(M_DOT)    ,TD(M_SLSH)  ,KC_ENT    , 
-KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,TD(TD_MOUSE)    ,KC_LEFT ,KC_DOWN     ,KC_UP       ,KC_RGHT   
+KC_ESC     ,KC_Q        ,KC_W        ,KC_F        ,KC_P        ,KC_G   ,KC_J   ,KC_L         ,KC_U        ,KC_Y        ,M(M_SCLN)   ,KC_BSPC   , 
+KC_TAB     ,GUI_T(KC_A) ,ALT_T(KC_R) ,SFT_T(KC_S) ,CTL_T(KC_T) ,KC_D   ,KC_H   ,CTL_T(KC_N)  ,SFT_T(KC_E) ,ALT_T(KC_I) ,GUI_T(KC_O) ,M(M_QUOT) , 
+KC_LSFT    ,KC_Z        ,KC_X        ,TD(TD_C)    ,KC_V        ,KC_B   ,KC_K   ,KC_M         ,M(M_COMM)   ,M(M_DOT)    ,TD(TD_SLSH) ,KC_ENT    , 
+KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,TD(TD_MOUSE) ,KC_APP      ,KC_DOWN     ,KC_UP       ,KC_RGHT   
 ),
 
 /* Dvorak
@@ -351,19 +403,19 @@ KC_LCTL    ,RGB_TOG     ,KC_LGUI     ,KC_LALT     ,LOWER       ,KC_SPC ,KC_SPC ,
  * ,-----------------------------------------------------------------------------------.
  * |   ~  |   !  |   @  |   (  |   )  |   %  |   ^  |   7  |   8  |   9  |   -  | Bksp |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |   &  |   #  |   €  |   [  |   ]  |   *  |   ´  |   4  |   5  |   6  |   +  |  =   |
+ * |   &  |   #  |   $  |   [  |   ]  |   *  |   ´  |   4  |   5  |   6  |   +  |  =   |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |   $  |   {  |   }  |   ¨  |   `  |   1  |   2  |   3  | \ |  |      |
+ * |      |      |   €  |   {  |   }  |   ¨  |   `  |   1  |   2  |   3  | \ |  |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * | Ctrl | RGB  | GUI  | Alt  |Lower |             |Adjust|   0  |   .  | Vol+ | Play |
  * `-----------------------------------------------------------------------------------'
  */
 [_LOWER] = LAYOUT_planck_grid(
-ES_TILD ,TD(TD_EXLM)    ,ES_AT          ,ES_LPRN        ,ES_RPRN        ,KC_PERC ,ES_CIRC ,KC_7        ,KC_8        ,KC_9        ,ES_MINS        ,KC_BSPC ,
-//ES_AMPR , MT(KC_LGUI, ES_HASH) ,ALT_T(ES_EURO) ,SFT_T(ES_LBRC) ,CTL_T(ES_RBRC) ,ES_ASTR ,ES_ACUT ,CTL_T(KC_4) ,SFT_T(KC_5) ,ALT_T(KC_6) ,GUI_T(ES_PLUS) ,ES_EQL  ,
-ES_AMPR , ES_HASH ,ES_EURO,ES_LBRC ,ES_RBRC ,ES_ASTR ,ES_ACUT ,KC_4 ,KC_5 ,KC_6 ,ES_PLUS ,ES_EQL  ,
-_______ ,_______        ,ES_DLR         ,ES_LCBR        ,ES_RCBR        ,ES_DIAE ,ES_GRV  ,KC_1        ,KC_2        ,KC_3        ,M(M_BSLS)      ,_______ ,
-_______ ,_______        ,_______        ,_______        ,_______        ,_______ ,_______ ,_______     ,KC_0        ,KC_DOT      ,KC_VOLU        ,KC_MPLY 
+ES_TILD ,TD(TD_EXLM) ,ES_AT    ,ES_LPRN        ,ES_RPRN        ,KC_PERC        ,ES_CIRC ,KC_7    ,KC_8        ,KC_9        ,ES_MINS     ,KC_BSPC        ,         
+// ES_AMPR ,MT(KC_LGUI  ,ES_HASH) ,ALT_T(ES_EURO) ,SFT_T(ES_LBRC) ,CTL_T(ES_RBRC) ,ES_ASTR ,ES_ACUT ,CTL_T(KC_4) ,SFT_T(KC_5) ,ALT_T(KC_6) ,GUI_T(ES_PLUS) ,ES_EQL , 
+ES_AMPR ,ES_HASH     ,ES_DLR   ,ES_LBRC        ,ES_RBRC        ,ES_ASTR        ,ES_ACUT ,KC_4    ,KC_5        ,KC_6        ,ES_PLUS     ,ES_EQL         ,         
+KC_CAPS ,_______     ,ES_EURO  ,ES_LCBR        ,ES_RCBR        ,ES_DIAE        ,ES_GRV  ,KC_1    ,KC_2        ,KC_3        ,M(M_BSLS)   ,_______        ,         
+_______ ,_______     ,_______  ,_______        ,_______        ,_______        ,_______ ,_______ ,KC_0        ,KC_DOT      ,KC_VOLU     ,KC_MPLY                 
 ),
 
 /* Raise
@@ -423,9 +475,9 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
 
 /* Mouse
  * ,-----------------------------------------------------------------------------------.
- * |      |      |      |      |      |      |      |LeftC | Up   |RightC|ScroUp|      |
+ * | set  | Like |      |      |      |      |      |LeftC | Up   |RightC|ScroUp|      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |      |      |      |      |      | Left | Down | Right|ScroDo|      |
+ * | Car  |      |      |      |      |      |      | Left | Down | Right|ScroDo|      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |      |      |      |      |      |      |Speed1|Speed2|Speed3|      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
@@ -433,10 +485,10 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
  * `-----------------------------------------------------------------------------------'
  */
 [_MOUSE] = LAYOUT_planck_grid(
-    _______, _______, _______, _______, _______, _______, _______, KC_BTN1, KC_MS_U,  KC_BTN2, KC_WH_U, _______,
-    _______, _______, _______, _______, _______, _______, _______, KC_MS_L, KC_MS_D,  KC_MS_R, KC_WH_D, _______,
-    _______, _______, _______, _______, _______, _______, _______, KC_ACL0, KC_ACL1,  KC_ACL2, _______, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, _______
+    M(M_TEXT) , M(M_LSPOT), _______, _______, _______, _______, _______, KC_BTN1, KC_MS_U,  KC_BTN2, KC_WH_U, _______,
+    M(M_TEXT1),    _______, _______, _______, _______, _______, _______, KC_MS_L, KC_MS_D,  KC_MS_R, KC_WH_D, _______,
+    _______   ,    _______, _______, _______, _______, _______, _______, KC_ACL0, KC_ACL1,  KC_ACL2, _______, _______,
+    _______   ,    _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, _______
 )
 
 };

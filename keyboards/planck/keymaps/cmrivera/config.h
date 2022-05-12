@@ -16,7 +16,7 @@
 
 #pragma once
 #include "config_common.h"
-#define TAPPING_TERM 250
+#define TAPPING_TERM 230
 #define IGNORE_MOD_TAP_INTERRUPT
 #define TAPPING_FORCE_HOLD
 
