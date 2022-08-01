@@ -306,6 +306,16 @@ enum {
     M_W=34,
     M_M=35,
     M_Z=36,
+    M_0=37,
+    M_1=38,
+    M_2=39,
+    M_3=40,
+    M_4=41,
+    M_5=42,
+    M_6=43,
+    M_7=44,
+    M_8=45,
+    M_9=46,
 };
 // Macro Definitions
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
@@ -528,15 +538,140 @@ case M_A: { // A
 	  }
 	}
 	break;
-  case M_TEXT: { // Sending text 1 
+  //Addind number support in french
+  case M_0: { // 0
 	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_0,_______,KC_0,_______,FR_0); // 0
+		}else{
+      tap_key_lang(_______,KC_0,_______,KC_0,_______,FR_0); // 0
+		}
+	  }
+	}    
+  break;
+  case M_1: { // 1
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_1,_______,KC_1,_______,FR_1); // 1
+		}else{
+      tap_key_lang(_______,KC_1,_______,KC_1,_______,FR_1); // 1
+		}
+	  }
+	}    
+  break;
+  case M_2: { // 2
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_2,_______,KC_2,_______,FR_2); // 2
+		}else{
+      tap_key_lang(_______,KC_2,_______,KC_2,_______,FR_2); // 2
+		}
+	  }
+	}    
+  break;
+  case M_3: { // 3
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_3,_______,KC_3,_______,FR_3); // 3
+		}else{
+      tap_key_lang(_______,KC_3,_______,KC_3,_______,FR_3); // 3
+		}
+	  }
+	}    
+  break;
+  case M_4: { // 4
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_4,_______,KC_4,_______,FR_4); // 4
+		}else{
+      tap_key_lang(_______,KC_4,_______,KC_4,_______,FR_4); // 4
+		}
+	  }
+	}    
+  break;
+  case M_5: { // 5
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_5,_______,KC_5,_______,FR_5); // 5
+		}else{
+      tap_key_lang(_______,KC_5,_______,KC_5,_______,FR_5); // 5
+		}
+	  }
+	}    
+  break;
+  case M_6: { // 6
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_6,_______,KC_6,_______,FR_6); // 6
+		}else{
+      tap_key_lang(_______,KC_6,_______,KC_6,_______,FR_6); // 6
+		}
+	  }
+	}    
+  break;
+  case M_7: { // 7
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_7,_______,KC_7,_______,FR_7); // 7
+		}else{
+      tap_key_lang(_______,KC_7,_______,KC_7,_______,FR_7); // 7
+		}
+	  }
+	}    
+  break;
+  case M_8: { // 8
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_8,_______,KC_8,_______,FR_8); // 8
+		}else{
+      tap_key_lang(_______,KC_8,_______,KC_8,_______,FR_8); // 8
+		}
+	  }
+	}    
+  break;
+  case M_9: { // 9
+	  if (record->event.pressed) {     
+		if (temp_mod & MODS_SHIFT_MASK) {
+      tap_key_lang(_______,KC_9,_______,KC_9,_______,FR_9); // 9
+		}else{
+      tap_key_lang(_______,KC_9,_______,KC_9,_______,FR_9); // 9
+		}
+	  }
+	}    
+  break;
+
+  //
+  case M_TEXT: { // Sending text 1 
+	  if (record->event.pressed) {
+      switch (language)
+    {
+    case ES:
       SEND_STRING("setxkbmap es");
+      break;
+    case EN:
+      SEND_STRING("setxkbmap es");
+      break;
+    case FR:
+      SEND_STRING("setxb;qp es");
+      break;
+    }
 	  }
 	}
 	break;
   case M_TEXT1: { // Sending text 2
-	  if (record->event.pressed) {     
+  	if (record->event.pressed) {
+      switch (language)
+    {
+    case ES:
       SEND_STRING("Carlos RIVERA");
+      break;
+    case EN:
+      SEND_STRING("Carlos RIVERA");
+      break;
+    case FR:
+      SEND_STRING("Cqrlos RIVERQ");
+      break;
+    }
 	  }
 	}
 	break;
@@ -604,10 +739,10 @@ KC_LCTL     ,RGB_TOG        ,KC_LGUI        ,KC_LALT      ,LOWER        ,KC_SPC 
  * `-----------------------------------------------------------------------------------'
  */
 [_LOWER] = LAYOUT_planck_grid(
-M(M_TILD)  ,TD(TD_EXLM)    ,M(M_AT)     ,M(M_LPRN)         ,M(M_RPRN)         ,M(M_PERC)         ,M(M_CIRC)  ,KC_7     ,KC_8         ,KC_9         ,M(M_MINS)      ,KC_BSPC           , 
-M(M_AMPR)  ,M(M_HASH)      ,M(M_DLR)    ,M(M_LBRC)         ,M(M_RBRC)         ,M(M_ASTR)         ,M(M_ACUT)  ,KC_4     ,KC_5         ,KC_6         ,M(M_PLUS)      ,M(M_EQL)          , 
-KC_CAPS    ,_______        ,M(M_EURO)   ,M(M_LCBR)         ,M(M_RCBR)         ,M(M_DIAE)         ,M(M_GRV)   ,KC_1     ,KC_2         ,KC_3         ,M(M_BSLS)      ,_______           , 
-_______    ,_______        ,_______     ,_______           ,_______           ,_______           ,_______    ,_______  ,KC_0         ,KC_DOT       ,KC_VOLU        ,KC_MPLY                  
+M(M_TILD)  ,TD(TD_EXLM)    ,M(M_AT)     ,M(M_LPRN)         ,M(M_RPRN)         ,M(M_PERC)         ,M(M_CIRC)  ,M(M_7)   ,M(M_8)       ,M(M_9)       ,M(M_MINS)      ,KC_BSPC           , 
+M(M_AMPR)  ,M(M_HASH)      ,M(M_DLR)    ,M(M_LBRC)         ,M(M_RBRC)         ,M(M_ASTR)         ,M(M_ACUT)  ,M(M_4)   ,M(M_5)       ,M(M_6)       ,M(M_PLUS)      ,M(M_EQL)          , 
+KC_CAPS    ,_______        ,M(M_EURO)   ,M(M_LCBR)         ,M(M_RCBR)         ,M(M_DIAE)         ,M(M_GRV)   ,M(M_1)   ,M(M_2)       ,M(M_3)       ,M(M_BSLS)      ,_______           , 
+_______    ,_______        ,_______     ,_______           ,_______           ,_______           ,_______    ,_______  ,M(M_0)       ,KC_DOT       ,KC_VOLU        ,KC_MPLY                  
 ),
 
 /* Raise
