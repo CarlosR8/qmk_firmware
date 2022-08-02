@@ -687,18 +687,21 @@ case M_A: { // A
   // Set language
   case M_ES: {
 	  if (record->event.pressed) {     
+      set_single_persistent_default_layer(_COLEMAK);
       language=ES;
 	  }
 	}
 	break;
   case M_EN: {
 	  if (record->event.pressed) {     
+      set_single_persistent_default_layer(_COLEMAK);
       language=EN;
 	  }
 	}
 	break;
   case M_FR: {
 	  if (record->event.pressed) {     
+      set_single_persistent_default_layer(_COLEMAK);
       language=FR;
 	  }
 	}
@@ -789,7 +792,7 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
  * ,-----------------------------------------------------------------------------------.
  * |      | Reset|Debug | RGB  |RGBMOD| HUE+ | HUE- | SAT+ | SAT- |BRGTH+|BRGTH-|  Del |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |MUSmod|Aud on|Audoff|      |      |  ES  |  EN  |  FR  |Colema|Gaming|
+ * |      |      |MUSmod|Aud on|Audoff|      |      |  ES  |  EN  |  FR  |Colema|      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |Voice-|Voice+|Mus on|Musoff|MIDIon|MIDIof|TermOn|TermOf|      |      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
@@ -798,7 +801,7 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
  */
 [_ADJUST] = LAYOUT_planck_grid(
     _______, RESET,   DEBUG,   RGB_TOG, RGB_MOD, RGB_HUI, RGB_HUD, RGB_SAI, RGB_SAD,  RGB_VAI, RGB_VAD, KC_DEL ,
-    _______, _______, MU_MOD,  AU_ON,   AU_OFF,  _______, _______, M(M_ES),  M(M_EN),  M(M_FR), COLEMAK, GAMING,
+    _______, _______, MU_MOD,  AU_ON,   AU_OFF,  _______, _______, M(M_ES),  M(M_EN),  M(M_FR), GAMING, _______,
     _______, MUV_DE,  MUV_IN,  MU_ON,   MU_OFF,  MI_ON,   MI_OFF,  TERM_ON, TERM_OFF, _______, _______, _______,
     _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, _______
 ),
