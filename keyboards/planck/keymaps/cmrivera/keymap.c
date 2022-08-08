@@ -47,13 +47,35 @@ enum planck_keycodes {
 #define MOUSE MO(_MOUSE)
 //
 
-//TAP DANCING
-#define MODS_SHIFT_MASK (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
-#define MODS_CTRL_MASK (MOD_BIT(KC_LCTRL)|MOD_BIT(KC_RCTRL))
+// Function to send key based on language
 void tap_key(uint16_t keycode) {
   register_code16(keycode);
   unregister_code16(keycode);
 }
+
+void tap_key_lang(uint16_t modifier_es, uint16_t key_es, uint16_t modifier_en, uint16_t key_en, uint16_t modifier_fr, uint16_t key_fr){
+  switch (language)
+  {
+  case ES:
+    register_code(modifier_es);
+    tap_key(key_es);
+    break;
+  case EN:
+    register_code(modifier_en);
+    tap_key(key_en);
+    break;
+  case FR:
+    register_code(modifier_fr);
+    tap_key(key_fr);
+    break;
+  }
+  return;
+}
+
+//TAP DANCING
+#define MODS_SHIFT_MASK (MOD_BIT(KC_LSHIFT)|MOD_BIT(KC_RSHIFT))
+#define MODS_CTRL_MASK (MOD_BIT(KC_LCTRL)|MOD_BIT(KC_RCTRL))
+
 // Quad
 typedef enum {
     TD_NONE,
@@ -103,63 +125,25 @@ static td_tap_t keytap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
-void dance_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
-    keytap_state.state = cur_dance(state);
-    switch (keytap_state.state) {
-        case TD_SINGLE_HOLD: register_code(KC_LSHIFT); break;
-        case TD_DOUBLE_HOLD: tap_key(KC_CAPS); break;
-        default: break;
-    }
-}
-void dance_tab_reset(qk_tap_dance_state_t *state, void *user_data) {
-  unregister_code(KC_LSHIFT);
-}
+
 // Quad ends
-enum {
-  TD_N = 0,
-  TD_C = 1,
-  TD_SLSH = 2,
-  TD_TAB = 3,
-  TD_EXLM = 4, 
-  TD_MOUSE = 5,
+enum {  
+  TD_C = 0,
+  TD_SLSH = 1,
+  TD_EXLM = 2, 
+  TD_MOUSE = 3,
 };
 
 void matrix_init_user(void) {
     set_unicode_input_mode(UC_WIN);
 };
-//N and Ñ
-// void dance_enie_reset(qk_tap_dance_state_t *state, void *user_data) {
-//   //  keytap_state.state = cur_dance(state);
-//   //   switch (keytap_state.state) {
-//   //       case TD_SINGLE_TAP: tap_key(KC_N); break;
-//   //       // case TD_SINGLE_HOLD: register_code(KC_LCTL); break;
-//   //       case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
-//   //       default: break;
-//   //   }
-//   unregister_code(KC_LCTL);
-// }
-// void dance_enie_finished(qk_tap_dance_state_t *state, void *user_data) {
-//    keytap_state.state = cur_dance(state);
-//     switch (keytap_state.state) {
-//         case TD_SINGLE_TAP: tap_key(KC_N); break;
-//         case TD_SINGLE_HOLD: register_code(KC_LCTL); break; 
-//         case TD_DOUBLE_TAP: tap_key(KC_SEMICOLON); break;
-//         default: break;
-//     }
-//   // unregister_code(KC_LCTL);
-//     // if (state->count == 1) {
-//     //     tap_key(KC_N);
-//     // } else {
-//     //     tap_key(KC_SEMICOLON);
-//     // }
-// }
-//
+
 //C and Ç
 void dance_cedille_finished(qk_tap_dance_state_t *state, void *user_data) {
     if (state->count == 1) {
         tap_key(KC_C);
     } else {
-        tap_key(KC_BSLS);
+      tap_key_lang(_______,ES_CCED,_______,_______,_______,FR_CCED); // ç
     }
 }
 //
@@ -169,53 +153,23 @@ void dance_slash_finished(qk_tap_dance_state_t *state, void *user_data) {
 	clear_mods();
 	if (temp_mod & MODS_SHIFT_MASK) { // Questions marks
 		if (state->count == 1) {
-			// register_code(KC_LSFT);	
-			// tap_key(ES_QUOT); // ?
-      register_code16(S(ES_QUOT));
-      unregister_code16(S(ES_QUOT));
+      tap_key_lang(_______,ES_QUES,_______,KC_QUES,_______,FR_QUES); // ?
 		}else{
-			register_code(KC_LSFT);	
-			tap_key(ES_IEXL); // ¿
+      tap_key_lang(_______,ES_IQUE,_______,_______ ,_______,_______);
 		}
 	}else{ // Slash
-		register_code(KC_LSFT);	
-    tap_key(ES_7); // /
+    tap_key_lang(_______,ES_SLSH ,_______,KC_SLSH ,_______,FR_SLSH); // Slash: /
 	}
   set_mods(temp_mod);
-
-  // uint8_t temp_mod = get_mods(); // doesn't work better
-  // keytap_state.state = cur_dance(state);
-  // switch (keytap_state.state) {
-  //     case TD_SINGLE_TAP: 
-  //       if (temp_mod & MODS_SHIFT_MASK) {
-  //         // register_code(KC_LSFT);	
-  //         // tap_key(ES_QUOT); // ?
-  //         register_code16(S(ES_QUOT));
-  //         unregister_code16(S(ES_QUOT));
-  //       }else{
-  //         register_code(KC_LSFT);	
-  //         tap_key(ES_7); // /
-  //       }
-  //       break;
-  //     case TD_DOUBLE_TAP: 
-  //       if (temp_mod & MODS_SHIFT_MASK) {
-  //         register_code(KC_LSFT);	
-  //         tap_key(ES_IEXL); // ¿
-  //       }
-  //       break;
-  //     default: break;
-  // }
-  // set_mods(temp_mod);
 }
 // ! ¡
 void dance_exlm_finished(qk_tap_dance_state_t *state, void *user_data) {
 	uint8_t temp_mod = get_mods();
 	clear_mods();
   if (state->count == 1) {
-    register_code(KC_LSFT);	
-    tap_key(ES_EXLM); // !
+    tap_key_lang(_______,ES_EXLM ,_______,KC_EXLM  ,_______,FR_EXLM); // !
   }else{
-    tap_key(ES_IEXL); // ¡
+    tap_key_lang(_______,ES_IEXL,_______,_______ ,_______,_______); // ¡
   }
   set_mods(temp_mod);
 }
@@ -240,33 +194,11 @@ void dance_mouse_reset(qk_tap_dance_state_t *state, void *user_data) {
 }
 //
 qk_tap_dance_action_t tap_dance_actions[] = {
-  // [TD_N] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_enie_finished, dance_enie_reset, 160),
-  [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_cedille_finished, NULL, 200), 
-  [TD_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_slash_finished, NULL, 170),
-  [TD_TAB] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_tab_finished, dance_tab_reset, 150),
-  [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_exlm_finished, NULL, 200), 
+  [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_cedille_finished, NULL, 200), // cç
+  [TD_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_slash_finished, NULL, 170), // /?¿
+  [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_exlm_finished, NULL, 200), // !¡
   [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(dance_mouse_tap, dance_mouse_finish, dance_mouse_reset, 200), 
 };
-
-// Function to send key based on language
-void tap_key_lang(uint16_t modifier_es, uint16_t key_es, uint16_t modifier_en, uint16_t key_en, uint16_t modifier_fr, uint16_t key_fr){
-  switch (language)
-  {
-  case ES:
-    register_code(modifier_es);
-    tap_key(key_es);
-    break;
-  case EN:
-    register_code(modifier_en);
-    tap_key(key_en);
-    break;
-  case FR:
-    register_code(modifier_fr);
-    tap_key(key_fr);
-    break;
-  }
-  return;
-}
 
 //MACROS
 // Macro Declarations
