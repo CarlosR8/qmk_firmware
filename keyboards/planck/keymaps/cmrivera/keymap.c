@@ -18,6 +18,7 @@
 #include "muse.h"
 #include "keymap_spanish.h"
 #include "keymap_french.h"
+#include "not_public.h"
 // Defining language macros
 #define ES 1
 #define EN 2
@@ -250,6 +251,7 @@ enum {
     M_7=44,
     M_8=45,
     M_9=46,
+    M_EMAIL = 47,
 };
 // Macro Definitions
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
@@ -609,6 +611,23 @@ case M_A: { // A
 	  }
 	}
 	break;
+  case M_EMAIL: { // Sending EMAIL
+  	if (record->event.pressed) {
+      switch (language)
+    {
+    case ES:
+      SEND_STRING(EMAIL); // TODO: Add ES support (@)
+      break;
+    case EN:
+      SEND_STRING(EMAIL);
+      break;
+    case FR:
+      // SEND_STRING(""); // TODO: Add FR support
+      break;
+    }
+	  }
+	}
+	break;
   case M_LSPOT: { // Send AltGr + L to trigger Spotify like
 	  if (record->event.pressed) {     
       register_code(KC_ALGR);
@@ -688,7 +707,7 @@ KC_LCTL     ,RGB_TOG        ,KC_LGUI        ,KC_LALT      ,LOWER        ,KC_SPC 
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |   &  |   #  |   $  |   [  |   ]  |   *  |   ´  |   4  |   5  |   6  |   +  |  =   |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |   €  |   {  |   }  |   ¨  |   `  |   1  |   2  |   3  | \ |  |      |
+ * |Caps l| Del  |   €  |   {  |   }  |   ¨  |   `  |   1  |   2  |   3  | \ |  |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * | Ctrl | RGB  | GUI  | Alt  |Lower |             |Adjust|   0  |   .  | Vol+ | Play |
  * `-----------------------------------------------------------------------------------'
@@ -696,7 +715,7 @@ KC_LCTL     ,RGB_TOG        ,KC_LGUI        ,KC_LALT      ,LOWER        ,KC_SPC 
 [_LOWER] = LAYOUT_planck_grid(
 M(M_TILD)  ,TD(TD_EXLM)    ,M(M_AT)     ,M(M_LPRN)         ,M(M_RPRN)         ,M(M_PERC)         ,M(M_CIRC)  ,M(M_7)   ,M(M_8)       ,M(M_9)       ,M(M_MINS)      ,KC_BSPC           , 
 M(M_AMPR)  ,M(M_HASH)      ,M(M_DLR)    ,M(M_LBRC)         ,M(M_RBRC)         ,M(M_ASTR)         ,M(M_ACUT)  ,M(M_4)   ,M(M_5)       ,M(M_6)       ,M(M_PLUS)      ,M(M_EQL)          , 
-KC_CAPS    ,_______        ,M(M_EURO)   ,M(M_LCBR)         ,M(M_RCBR)         ,M(M_DIAE)         ,M(M_GRV)   ,M(M_1)   ,M(M_2)       ,M(M_3)       ,M(M_BSLS)      ,_______           , 
+KC_CAPS    ,KC_DEL         ,M(M_EURO)   ,M(M_LCBR)         ,M(M_RCBR)         ,M(M_DIAE)         ,M(M_GRV)   ,M(M_1)   ,M(M_2)       ,M(M_3)       ,M(M_BSLS)      ,_______           , 
 _______    ,_______        ,_______     ,_______           ,_______           ,_______           ,_______    ,_______  ,M(M_0)       ,KC_DOT       ,KC_VOLU        ,KC_MPLY                  
 ),
 
@@ -742,9 +761,9 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
  * ,-----------------------------------------------------------------------------------.
  * | set  | Like |      |      |      |      |      |LeftC | Up   |RightC|ScroUp|      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Car  |      |      |      |      |      |      | Left | Down | Right|ScroDo|      |
+ * | Name |      |      |      |      |      |      | Left | Down | Right|ScroDo|      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |      |      |      |      |      |Speed1|Speed2|Speed3|      |      |
+ * | Email|      |      |      |      |      |      |Speed1|Speed2|Speed3|      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |      |      |      |      |             |      |MOUSEL|      |      |      |
  * `-----------------------------------------------------------------------------------'
@@ -752,7 +771,7 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
 [_MOUSE] = LAYOUT_planck_grid(
     M(M_TEXT) , M(M_LSPOT), _______, _______, _______, _______, _______, KC_BTN1, KC_MS_U,  KC_BTN2, KC_WH_U, _______,
     M(M_TEXT1),    _______, _______, _______, _______, _______, _______, KC_MS_L, KC_MS_D,  KC_MS_R, KC_WH_D, _______,
-    _______   ,    _______, _______, _______, _______, _______, _______, KC_ACL0, KC_ACL1,  KC_ACL2, _______, _______,
+    M(M_EMAIL),    _______, _______, _______, _______, _______, _______, KC_ACL0, KC_ACL1,  KC_ACL2, _______, _______,
     _______   ,    _______, _______, _______, _______, _______, _______, _______, _______,  _______, _______, _______
 )
 
