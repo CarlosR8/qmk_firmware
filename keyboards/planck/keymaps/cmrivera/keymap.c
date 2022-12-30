@@ -251,7 +251,10 @@ enum {
     M_7=44,
     M_8=45,
     M_9=46,
-    M_EMAIL = 47,
+    M_EMAIL=47,
+    M_UART=48,
+    M_WF=49, //Skip word forward
+    M_WB=50, //Skip word backward
 };
 // Macro Definitions
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt)
@@ -613,7 +616,7 @@ case M_A: { // A
 	break;
   case M_EMAIL: { // Sending EMAIL
   	if (record->event.pressed) {
-      switch (language)
+    switch (language)
     {
     case ES:
       SEND_STRING(EMAIL); // TODO: Add ES support (@)
@@ -628,10 +631,52 @@ case M_A: { // A
 	  }
 	}
 	break;
+  case M_UART: { // Sending UART
+  	if (record->event.pressed) {
+      //left to right
+      tap_key(KC_F24); //1
+      tap_key(KC_F24); //1
+      tap_key(KC_F24); //1
+      tap_key(KC_F24); //1
+      tap_key(KC_F24); //1
+      tap_key(KC_F23); //0
+      tap_key(KC_F24); //1
+      tap_key(KC_F24); //1
+      tap_key(KC_F24); //1
+      //503 = 111110111
+	  }
+	}
+	break;
   case M_LSPOT: { // Send AltGr + L to trigger Spotify like
 	  if (record->event.pressed) {     
       register_code(KC_ALGR);
       tap_key(KC_L);
+	  }
+	}
+	break;
+  case M_WF: { // Skip word fordward
+	  if (record->event.pressed) {
+      if (temp_mod & MODS_SHIFT_MASK) {
+        register_code(KC_LSFT);  
+        register_code(KC_LCTL);  
+        tap_key(KC_RIGHT);
+      }else{
+        register_code(KC_LCTL);  
+        tap_key(KC_RIGHT);
+      }
+	  }
+	}
+	break;
+  case M_WB: { // Skip word backward
+	  if (record->event.pressed) {     
+      if (temp_mod & MODS_SHIFT_MASK) {
+        register_code(KC_LSFT);  
+        register_code(KC_LCTL);  
+        tap_key(KC_LEFT);
+      }else{
+        register_code(KC_LCTL);  
+        tap_key(KC_LEFT);
+      }
 	  }
 	}
 	break;
@@ -680,7 +725,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 KC_ESC      ,M(M_Q)         ,M(M_W)         ,KC_F         ,KC_P         ,KC_G    ,KC_J    ,KC_L          ,KC_U         ,KC_Y         ,M(M_SCLN)    ,KC_BSPC    , 
 KC_TAB      ,M(M_A)         ,ALT_T(KC_R)    ,SFT_T(KC_S)  ,CTL_T(KC_T)  ,KC_D    ,KC_H    ,CTL_T(KC_N)   ,SFT_T(KC_E)  ,ALT_T(KC_I)  ,GUI_T(KC_O)  ,M(M_QUOT)  , 
 KC_LSFT     ,M(M_Z)         ,KC_X           ,TD(TD_C)     ,KC_V         ,KC_B    ,KC_K    ,M(M_M)        ,M(M_COMM)    ,M(M_DOT)     ,TD(TD_SLSH)  ,KC_ENT     , 
-KC_LCTL     ,RGB_TOG        ,KC_LGUI        ,KC_LALT      ,LOWER        ,KC_SPC  ,KC_SPC  ,TD(TD_MOUSE)  ,KC_APP       ,KC_DOWN      ,KC_UP        ,KC_RGHT    
+KC_LCTL     ,M(M_UART)        ,KC_LGUI        ,KC_LALT      ,LOWER        ,KC_SPC  ,KC_SPC  ,TD(TD_MOUSE)  ,KC_APP       ,KC_DOWN      ,KC_UP        ,KC_RGHT    
 ),
 
 /* Gaming (Colemak without tap dancing)
@@ -725,7 +770,7 @@ _______    ,_______        ,_______     ,_______           ,_______           ,_
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |  F5  |  F6  |  F7  |  F8  |      |      | Left | Down |Right |Pg Dn |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |  F9  |  F10 |  F11 |  F12 |      |      |ISO # |ISO / |Pg Up |Pg Dn |Insert|
+ * |      |  F9  |  F10 |  F11 |  F12 |      |      |ISO # |ISO / |Wd Fw |Wd Bd |Insert|
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * | Ctrl | RGB  | GUI  | Alt  |Adjust|             |Raise | Next | Vol- | Vol+ | Play |
  * `-----------------------------------------------------------------------------------'
@@ -733,7 +778,7 @@ _______    ,_______        ,_______     ,_______           ,_______           ,_
 [_RAISE] = LAYOUT_planck_grid(
 _______ ,KC_F1        ,KC_F2        ,KC_F3        ,KC_F4        ,_______ ,_______ ,KC_HOME ,KC_UP   ,KC_END   ,KC_PGUP ,KC_BSPC   , 
 _______ ,GUI_T(KC_F5) ,ALT_T(KC_F6) ,SFT_T(KC_F7) ,CTL_T(KC_F8) ,_______ ,_______ ,KC_LEFT ,KC_DOWN ,KC_RIGHT ,KC_PGDN ,_______   , 
-_______ ,KC_F9        ,KC_F10       ,KC_F11       ,KC_F12       ,_______ ,_______ ,KC_NUHS ,KC_NUBS ,KC_PGUP  ,KC_PGDN ,KC_INS    , 
+_______ ,KC_F9        ,KC_F10       ,KC_F11       ,KC_F12       ,_______ ,_______ ,KC_NUHS ,KC_NUBS ,M(M_WB)  ,M(M_WF) ,KC_INS    , 
 _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,_______ ,_______ ,KC_MNXT ,KC_VOLD  ,KC_VOLU ,KC_MPLY   
 ),
 
@@ -743,7 +788,7 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
  * ,-----------------------------------------------------------------------------------.
  * |      | Reset|Debug | RGB  |RGBMOD| HUE+ | HUE- | SAT+ | SAT- |BRGTH+|BRGTH-|  Del |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |MUSmod|Aud on|Audoff|      |      |  ES  |  EN  |  FR  |Colema|      |
+ * |      |      |MUSmod|Aud on|Audoff|      |      |  ES  |  EN  |  FR  |Gaming|      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |Voice-|Voice+|Mus on|Musoff|MIDIon|MIDIof|TermOn|TermOf|      |      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
@@ -765,7 +810,7 @@ _______ ,_______      ,_______      ,_______      ,_______      ,_______ ,______
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * | Email|      |      |      |      |      |      |Speed1|Speed2|Speed3|      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |      |      |      |      |      |             |      |MOUSEL|      |      |      |
+ * |      |      |      |      |      |             |MOUSEL|      |      |      |      |
  * `-----------------------------------------------------------------------------------'
  */
 [_MOUSE] = LAYOUT_planck_grid(
