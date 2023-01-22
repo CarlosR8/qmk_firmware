@@ -133,6 +133,7 @@ enum {
   TD_SLSH = 1,
   TD_EXLM = 2, 
   TD_MOUSE = 3,
+  TD_SONG = 4,
 };
 
 void matrix_init_user(void) {
@@ -194,11 +195,24 @@ void dance_mouse_reset(qk_tap_dance_state_t *state, void *user_data) {
   layer_off(_MOUSE);
 }
 //
+
+// Next or previous song
+void dance_song_finish(qk_tap_dance_state_t *state, void *user_data) {
+keytap_state.state = cur_dance(state);
+    switch (keytap_state.state) {
+        case TD_SINGLE_TAP: tap_key(KC_MNXT); break;
+        case TD_DOUBLE_TAP: tap_key(KC_MPRV); break;
+        default: break;
+    }
+}
+//
+
 qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_C] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_cedille_finished, NULL, 200), // cç
   [TD_SLSH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_slash_finished, NULL, 170), // /?¿
   [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_exlm_finished, NULL, 200), // !¡
   [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(dance_mouse_tap, dance_mouse_finish, dance_mouse_reset, 200), 
+  [TD_SONG] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_song_finish, NULL, 200), // Next/Prev song
 };
 
 //MACROS
@@ -772,14 +786,14 @@ _______    ,_______        ,_______     ,_______           ,_______           ,_
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |  F9  |  F10 |  F11 |  F12 |      |      |ISO # |ISO / |Wd Fw |Wd Bd |Insert|
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Ctrl | RGB  | GUI  | Alt  |Adjust|             |Raise | Next | Vol- | Vol+ | Play |
+ * | Ctrl | RGB  | GUI  | Alt  |Adjust|             |Raise | Song | Vol- | Vol+ | Play |
  * `-----------------------------------------------------------------------------------'
  */
 [_RAISE] = LAYOUT_planck_grid(
-_______ ,KC_F1        ,KC_F2        ,KC_F3        ,KC_F4        ,_______ ,_______ ,KC_HOME ,KC_UP   ,KC_END   ,KC_PGUP ,KC_BSPC   , 
-_______ ,GUI_T(KC_F5) ,ALT_T(KC_F6) ,SFT_T(KC_F7) ,CTL_T(KC_F8) ,_______ ,_______ ,KC_LEFT ,KC_DOWN ,KC_RIGHT ,KC_PGDN ,_______   , 
-_______ ,KC_F9        ,KC_F10       ,KC_F11       ,KC_F12       ,_______ ,_______ ,KC_NUHS ,KC_NUBS ,M(M_WB)  ,M(M_WF) ,KC_INS    , 
-_______ ,_______      ,_______      ,_______      ,_______      ,_______ ,_______ ,_______ ,KC_MNXT ,KC_VOLD  ,KC_VOLU ,KC_MPLY   
+_______ ,KC_F1        ,KC_F2        ,KC_F3        ,KC_F4        ,_______ ,_______ ,KC_HOME ,KC_UP       ,KC_END   ,KC_PGUP ,KC_BSPC   , 
+_______ ,GUI_T(KC_F5) ,ALT_T(KC_F6) ,SFT_T(KC_F7) ,CTL_T(KC_F8) ,_______ ,_______ ,KC_LEFT ,KC_DOWN     ,KC_RIGHT ,KC_PGDN ,_______   , 
+_______ ,KC_F9        ,KC_F10       ,KC_F11       ,KC_F12       ,_______ ,_______ ,KC_NUHS ,KC_NUBS     ,M(M_WB)  ,M(M_WF) ,KC_INS    , 
+_______ ,_______      ,_______      ,_______      ,_______      ,_______ ,_______ ,_______ ,TD(TD_SONG) ,KC_VOLD  ,KC_VOLU ,KC_MPLY   
 ),
 
 
