@@ -212,10 +212,17 @@ keytap_state.state = cur_dance(state);
 void dance_mute_finish(qk_tap_dance_state_t *state, void *user_data) {
 keytap_state.state = cur_dance(state);
     switch (keytap_state.state) {
-        case TD_SINGLE_TAP: tap_key(KC_VOLD); break;
-        case TD_DOUBLE_TAP: tap_key(KC_MUTE); break;
+        case TD_SINGLE_TAP:
+        case TD_SINGLE_HOLD: register_code16(KC_VOLD); break;
+        case TD_DOUBLE_TAP:
+        case TD_DOUBLE_HOLD: register_code16(KC_MUTE); break;
         default: break;
     }
+}
+
+void dance_mute_reset(qk_tap_dance_state_t *state, void *user_data) {
+  unregister_code16(KC_VOLD);
+  unregister_code16(KC_MUTE);
 }
 //
 
@@ -225,7 +232,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_EXLM] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_exlm_finished, NULL, 200), // !¡
   [TD_MOUSE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(dance_mouse_tap, dance_mouse_finish, dance_mouse_reset, 200), 
   [TD_SONG] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_song_finish, NULL, 200), // Next/Prev song
-  [TD_MUTE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_mute_finish, NULL, 200), // Volume down or mute
+  [TD_MUTE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, dance_mute_finish, dance_mute_reset, 200), // Volume down or mute
 };
 
 //MACROS
